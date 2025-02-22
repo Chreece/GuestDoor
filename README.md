@@ -117,6 +117,7 @@ data:
 
 ## How It Works
 
+- A Home Assistant automation, stores a passcode in GuestDoor database.
 - The app checks the passcode entered by the user against the one stored in the Postgres database.
 - If the passcode is correct, it triggers the Home Assistant webhook defined in the `.env` file.
 - If the passcode is incorrect, the user has 3 attempts. After 3 failed attempts, the IP will be locked for 1 minute.
