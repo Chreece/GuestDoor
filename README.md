@@ -65,7 +65,7 @@ PORT=5000
 ```
 
 API_SECRET: A secret token for Authentication allowing HA to communicate with the APP and store the passcode.
-HA_WEBHOOK: The webhook url from [HA](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-webhook-trigger-in-home-assistant) (http://`homeassistant_ip`:`homeassistant_port`/api/webhook/`webhook_id`).
+HA_WEBHOOK: The webhook url from [Webhook Trigger](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-webhook-trigger-in-home-assistant) (http://`homeassistant_ip`:`homeassistant_port`/api/webhook/`webhook_id`).
 POSTGRES_USER: Your PostgreSQL database user.
 POSTGRES_PASSWORD: The password for the PostgreSQL database user.
 PORT: The port that the webpage is listening
