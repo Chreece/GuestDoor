@@ -8,6 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 COPY app.py .
 COPY frontend /app/frontend
+COPY .env .
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
