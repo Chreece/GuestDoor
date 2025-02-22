@@ -68,7 +68,7 @@ PORT=5000
 - HA_WEBHOOK: The webhook url from [Webhook Trigger](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-webhook-trigger-in-home-assistant) (http://`homeassistant_ip`:`homeassistant_port`/api/webhook/`webhook_id`).
 - POSTGRES_USER: Your PostgreSQL database user (optional).
 - POSTGRES_PASSWORD: The password for the PostgreSQL database user (optional).
-- PORT: The PORT for the webpage (http://<GuestDoor_server_ip>:<PORT>).
+- PORT: The PORT for the webpage (http://<GuestDoor_server_ip>:`PORT`>).
 
 ### 4. Build the Docker container:
 
