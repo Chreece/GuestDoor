@@ -85,7 +85,7 @@ The app will be accessible on `http://localhost:5000` (or `http://<GuestDoor_ser
 ```
 rest_command:
   rest_passcode:
-    url: "http://<GuestDoor_server_ip>:<PORT from [.env](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) file>/add_passcode"
+    url: "http://<GuestDoor_server_ip>:<PORT from .env file>/add_passcode"
     method: post
     headers:
       Authorization: !secret rest_passcode
