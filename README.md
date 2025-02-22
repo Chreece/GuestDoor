@@ -96,7 +96,7 @@ rest_command:
 ### 2. Create a secret in your secrets.yaml:
 
 ```
-rest_passcode: Bearer <here put the [`API_SECRET`](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) value from the .env file>
+rest_passcode: Bearer <here put the `API_SECRET` value from the .env file>
 ```
 Leave the `Bearer` and put the `API_SECRET` next to it (with a space between them)
 
