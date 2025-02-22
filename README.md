@@ -64,11 +64,11 @@ POSTGRES_PASSWORD=password
 PORT=5000
 ```
 
-API_SECRET: A secret token for Authentication allowing HA to communicate with the APP and store the passcode.
-HA_WEBHOOK: The webhook url from [Webhook Trigger](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-webhook-trigger-in-home-assistant) (http://`homeassistant_ip`:`homeassistant_port`/api/webhook/`webhook_id`).
-POSTGRES_USER: Your PostgreSQL database user.
-POSTGRES_PASSWORD: The password for the PostgreSQL database user.
-PORT: The port that the webpage is listening
+- API_SECRET: A secret token for Authentication allowing HA to communicate with the APP and store the passcode. You can [generate](https://it-tools.tech/token-generator) one.
+- HA_WEBHOOK: The webhook url from [Webhook Trigger](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-webhook-trigger-in-home-assistant) (http://`homeassistant_ip`:`homeassistant_port`/api/webhook/`webhook_id`).
+- POSTGRES_USER: Your PostgreSQL database user (optional).
+- POSTGRES_PASSWORD: The password for the PostgreSQL database user (optional).
+- PORT: The for the webpage (http://<GuestDoor_server_ip>:<PORT>).
 
 ### 4. Build the Docker container:
 
@@ -85,10 +85,10 @@ The app will be accessible on `http://localhost:5000` (or the local IP from Gues
 ```
 rest_command:
   rest_passcode:
-    url: "http://<GuestDoor_server_ip>:<PORT from [.env](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) file>/add_passcode" # Change the ip:port with the ip and port from your flask app
+    url: "http://<GuestDoor_server_ip>:<PORT from [.env](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) file>/add_passcode"
     method: post
     headers:
-      Authorization: !secret rest_passcode #
+      Authorization: !secret rest_passcode
       Content-Type: "application/json"
     payload: >
       {"passcode": {{ passcode }} }
