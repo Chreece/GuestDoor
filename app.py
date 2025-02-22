@@ -45,9 +45,6 @@ def create_table():
     print("Could not connect to database after multiple attempts. Exiting.")
     exit(1)
 
-# Call this function when Flask starts
-create_table()
-
 @app.route("/add_passcode", methods=["POST"])
 def add_passcode():
     """Securely adds a single passcode, replacing the existing one."""
@@ -166,4 +163,5 @@ def check_passcode():
 
 
 if __name__ == "__main__":
+    create_table()
     app.run(host="0.0.0.0", port=5000, debug=True)
