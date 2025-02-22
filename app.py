@@ -16,7 +16,7 @@ HOME_ASSISTANT_URL = os.getenv("HA_WEBHOOK", "")
 # Database connection
 DB_HOST = os.getenv("DB_HOST", "postgres")
 DB_USER = os.getenv("DB_USER", "myuser")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "mypassword")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "password")
 DB_NAME = os.getenv("DB_NAME", "passcodes")
 
 API_SECRET = os.getenv("API_SECRET", "NewcW0EXSFTBXWUKqy4V7DxqW4mBtnGVBiTsQR5AqMKqYH0c5VXaKhQpAAfJIoQHODA7sE5xwwkMh4pEe4rauRsDlGykLlbV4tQJsf51MMqGuyOf2I5zM7pS46XE6xSA")
