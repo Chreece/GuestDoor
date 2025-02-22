@@ -64,11 +64,11 @@ POSTGRES_PASSWORD=password
 PORT=5000
 ```
 
-- API_SECRET: A secret token for Authentication allowing HA to communicate with the APP and store the passcode. You can [generate](https://it-tools.tech/token-generator) one.
+- API_SECRET: A secret token for Authentication allowing HA to communicate with GuestDoor and store the passcode. You can [generate](https://it-tools.tech/token-generator) one.
 - HA_WEBHOOK: The webhook url from [Webhook Trigger](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-webhook-trigger-in-home-assistant) (http://`homeassistant_ip`:`homeassistant_port`/api/webhook/`webhook_id`).
 - POSTGRES_USER: Your PostgreSQL database user (optional).
 - POSTGRES_PASSWORD: The password for the PostgreSQL database user (optional).
-- PORT: The for the webpage (http://<GuestDoor_server_ip>:<PORT>).
+- PORT: The PORT for the webpage (http://<GuestDoor_server_ip>:<PORT>).
 
 ### 4. Build the Docker container:
 
@@ -76,7 +76,7 @@ PORT=5000
 docker compose up -d --build
 ```
 
-The app will be accessible on `http://localhost:5000` (or the local IP from GuestDoor server and the port you specified).
+The app will be accessible on `http://localhost:5000` (or `http://<GuestDoor_server_ip>:<PORT>`).
 
 ## Home Assistant Setup
 
@@ -96,9 +96,9 @@ rest_command:
 ### 2. Create a secret in your secrets.yaml:
 
 ```
-rest_passcode: Bearer <here put the API_SECRET value from the .env file>
+rest_passcode: Bearer <here put the [`API_SECRET`](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) value from the .env file>
 ```
-Leave the `Bearer` and put the API_SECRET next to it (with a space between them)
+Leave the `Bearer` and put the `API_SECRET` next to it (with a space between them)
 
 ### 3. Create a webhook [trigger](https://www.home-assistant.io/docs/automation/trigger/#webhook-trigger) in Home Assistant:
 
@@ -125,8 +125,9 @@ data:
 ## Troubleshooting
 
 - Ensure your `.env` file is correctly configured with the required variables.
-- Check the ip from your server to be the correct one in the: .env file, rest_command.
-- Check the webhook_id from your HA automation to match the url in .env file (http://<homeassistant_ip>:<homeassistant_port>/api/webhook/<webhook_id>)
+- Check the GuestDoor ip and `PORT` to be the correct one in the: .env file, [rest_command](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#1-create-a-restful-command-in-your-configurationyaml).
+- Check the webhook_id, home assistant ip, home assistant port, to match the url in .env file (http://<homeassistant_ip>:<homeassistant_port>/api/webhook/<webhook_id>).
+- Make sure you have stored a passcode with [rest_command](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#1-create-a-restful-command-in-your-configurationyaml).
 - Make sure your Postgres database is running and accessible by the Flask app.
 
 ## License
