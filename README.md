@@ -81,7 +81,7 @@ The app will be accessible on `http://localhost:5000` (or the local IP from serv
 
 ## Home Assistant Setup
 
-### 1. Create a rest command in your configuration.yaml:
+### 1. Create a [RESTful command](https://www.home-assistant.io/integrations/rest_command/) in your configuration.yaml:
 
 ```
 rest_command:
