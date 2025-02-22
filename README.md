@@ -65,7 +65,7 @@ PORT=5000
 ```
 ```
 API_SECRET: A secret token for Authentication allowing HA to communicate with the APP and store the passcode.
-HA_WEBHOOK: The webhook url that triggers your automation after the successful authentication.
+HA_WEBHOOK: The webhook url (http://`homeassistant_ip`:`homeassistant_port`/api/webhook/`webhook_id`) that triggers your automation after the successful authentication.
 POSTGRES_USER: Your PostgreSQL database user.
 POSTGRES_PASSWORD: The password for the PostgreSQL database user.
 PORT: The port that the webpage is listening
@@ -77,7 +77,7 @@ PORT: The port that the webpage is listening
 docker compose up -d --build
 ```
 
-The app will be accessible on `http://localhost:5000` (or the local IP from server and the port you specified).
+The app will be accessible on `http://localhost:5000` (or the local IP from GuestDoor server and the port you specified).
 
 ## Home Assistant Setup
 
@@ -86,10 +86,10 @@ The app will be accessible on `http://localhost:5000` (or the local IP from serv
 ```
 rest_command:
   rest_passcode:
-    url: "http://192.168.1.10:5000/add_passcode" # Change the ip:port with the ip and port from your flask app
+    url: "http://<GuestDoor_server_ip>:<PORT from [.env](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) file>/add_passcode" # Change the ip:port with the ip and port from your flask app
     method: post
     headers:
-      Authorization: !secret rest_passcode # This will be the authentication key for the app
+      Authorization: !secret rest_passcode #
       Content-Type: "application/json"
     payload: >
       {"passcode": {{ passcode }} }
@@ -99,10 +99,12 @@ rest_command:
 ```
 rest_passcode: Bearer <here put the API_SECRET value from the .env file>
 ```
+Leave the `Bearer` and put the API_SECRET next to it (with a space between them)
 
 ### 3. Create a webhook [trigger](https://www.home-assistant.io/docs/automation/trigger/#webhook-trigger) in Home Assistant:
 
 This webhook will be called from the flask app if the access is granted (passcode check) and the automation will be triggered
+Copy the webhook_id to [`HA_WEBHOOK`](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) variable in [.env](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) file
 
 ### 4. Create an automation in Home Assistant to update the passcode:
 
@@ -124,8 +126,9 @@ data:
 ## Troubleshooting
 
 - Ensure your `.env` file is correctly configured with the required variables.
+- Check the ip from your server to be the correct one in the: .env file, rest_command.
+- Check the webhook_id from your HA automation to match the url in .env file (http://<homeassistant_ip>:<homeassistant_port>/api/webhook/<webhook_id>)
 - Make sure your Postgres database is running and accessible by the Flask app.
-- If you're using Home Assistant, double-check the webhook URL and authentication details.
 
 ## License
 
