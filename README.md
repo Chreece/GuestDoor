@@ -13,13 +13,13 @@ When user within the WiFi network scans the NFC, a webpage launches and asks for
 ## Features
 
 - Trigger Automations without the Home Assistant APP, with a simple 4 digit passcode authentication.
-- It can be used locally (if it isn't exposed to internet)
+- Running and exposed locally.
 - Flask app running inside a Docker container.
 - Environment variables to configure the app.
 - Passcode stored and validated in a Postgres database.
-- Home Assistant authentication through Bearer API_SECRET for storing passcode.
-- Webhook trigger for automations.
 - IP lockout after 3 failed attempts for 1 minute.
+- Changing passcode from a Home Assistant automation securely via a Bearer `API_SECRET` authentication.
+- Webhook trigger for automations.
 
 ## Prerequisites
 
