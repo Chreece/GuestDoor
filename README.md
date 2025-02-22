@@ -7,8 +7,8 @@ This repository contains a Flask application running in a Docker container. Home
 ## Example usage
 
 Need to trigger home assistant actions without the need of Home Assistant APP (i.e. guests) with the help of a wepbage-passcode authentication.
-The address from the APP could be potentionally stored in a NFC tag.
-When user within the WiFi network scans the NFC, a webpage launches and asks for a passcode, if the passcode is correct, a Home Assistant action is triggered.
+The url from GuestDoor could be stored in a NFC tag.
+When a user, within the WiFi network scans the NFC, the webpage launches and asks for a passcode, if the passcode is correct, a Home Assistant action is triggered.
 
 ## Features
 
