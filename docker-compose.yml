@@ -1,0 +1,39 @@
+services:
+  flask:
+    build: 
+      context: https://github.com/Chreece/GuestDoor.git
+    container_name: flask
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=passcodes
+      - API_SECRET=${API_SECRET}
+      - HA_WEBHOOK=${HA_WEBHOOK}
+    ports:
+      - "${PORT}:5000"
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: passcodes
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app_network
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge

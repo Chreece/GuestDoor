@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Passcode</title>
+    <script>
+        async function submitPasscode() {
+            const passcode = document.getElementById("passcode").value;
+            const response = await fetch("/check_passcode", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ passcode })
+            });
+
+            const result = await response.json();
+            document.getElementById("message").innerText = result.message;
+        }
+    </script>
+</head>
+<body>
+    <h2>Enter Passcode</h2>
+    <input type="password" id="passcode" maxlength="4">
+    <button onclick="submitPasscode()">Submit</button>
+    <p id="message"></p>
+</body>
+</html>
