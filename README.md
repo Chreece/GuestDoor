@@ -25,7 +25,7 @@ When user within the WiFi network scans the NFC, a webpage launches and asks for
 
 - Docker
 - Docker Compose
-- Home Assistant setup for webhook integration
+- Home Assistant with rest_command to change the passcodes and trigger the action
 
 ## .env Configuration
 
