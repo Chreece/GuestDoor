@@ -1,5 +1,7 @@
 # GuestDoor - Run Home Assistant automations from a local webpage using passcode authentication.
 
+# DISCLAIMER: This project was developed with the assistance of ChatGPT. It is not intended for controlling critical security devices, as it has not been professionally verified.
+
 This repository contains a Flask application running in a Docker container. Home Assistant (HA) authenticates with the APP using a rest command to store a passcode in the Postgres database. The application checks in the webpage if the entered passcode is correct, triggers a HA webhook if correct, or locks the IP after 3 failed attempts for 1 minute.
 
 ## Example usage
