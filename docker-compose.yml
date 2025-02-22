@@ -10,8 +10,8 @@ services:
       - DB_NAME=passcodes
       - API_SECRET=${API_SECRET}
       - HA_WEBHOOK=${HA_WEBHOOK}
-    volumes:
-      - '.env:.env'
+    env_file:
+      - .env
     ports:
       - "${PORT:5000}:5000"
     depends_on:
