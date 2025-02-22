@@ -22,20 +22,28 @@ DB_NAME = os.getenv("DB_NAME", "passcodes")
 API_SECRET = os.getenv("API_SECRET", "")
 
 def create_table():
-    conn = psycopg2.connect(
-        host=DB_HOST, user=DB_USER, password=DB_PASSWORD, dbname=DB_NAME
-    )
-    cur = conn.cursor()
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS passcodes (
-            id SERIAL PRIMARY KEY,
-            code VARCHAR(10) NOT NULL,
-            date DATE NOT NULL DEFAULT CURRENT_DATE
-        );
-    """)
-    conn.commit()
-    cur.close()
-    conn.close()
+    for _ in range(10):  # Try for ~10 times
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS passcodes (
+                    id SERIAL PRIMARY KEY,
+                    code VARCHAR(10) NOT NULL,
+                    date DATE NOT NULL DEFAULT CURRENT_DATE
+                );
+            """)
+            conn.commit()
+            cur.close()
+            conn.close()
+            print("Database initialized.")
+            return
+        except psycopg2.OperationalError as e:
+            print(f"Database not ready: {e}")
+            time.sleep(5)  # Wait before retrying
+
+    print("Could not connect to database after multiple attempts. Exiting.")
+    exit(1)
 
 # Call this function when Flask starts
 create_table()
