@@ -1,19 +1,28 @@
 # GuestDoor - Run Home Assistant automations from a local webpage using passcode authentication.
 
-This repository contains a Flask application running in a Docker container. Home Assistant (HA) authenticates with the APP using a rest command to store a passcode in the Postgres database. The application checks in the webpage if the entered passcode is correct, triggers the HA webhook if correct, or locks the IP after 3 failed attempts for 1 minute.
+This repository contains a Flask application running in a Docker container. Home Assistant (HA) authenticates with the APP using a rest command to store a passcode in the Postgres database. The application checks in the webpage if the entered passcode is correct, triggers a HA webhook if correct, or locks the IP after 3 failed attempts for 1 minute.
+
+## Example usage
+
+Need to trigger home assistant actions without the need of Home Assistant APP (i.e. guests) with the help of a wepbage-passcode authentication.
+The address from the APP could be potentionally stored in a NFC tag.
+When user within the WiFi network scans the NFC, a webpage launches and asks for a passcode, if the passcode is correct, a Home Assistant action is triggered.
 
 ## Features
 
+- Trigger Automations without the Home Assistant APP, with a simple 4 digit passcode authentication.
+- It can be used locally (if it isn't exposed to internet)
 - Flask app running inside a Docker container.
 - Environment variables to configure the app.
 - Passcode stored and validated in a Postgres database.
-- Integration with Home Assistant for authentication.
+- Home Assistant authentication through Bearer API_SECRET for storing passcode.
+- Webhook trigger for automations.
 - IP lockout after 3 failed attempts for 1 minute.
 
 ## Prerequisites
 
 - Docker
-- Docker Compose (optional)
+- Docker Compose
 - Home Assistant setup for webhook integration
 
 ## .env Configuration
@@ -43,7 +52,7 @@ cd GuestDoor
 wget https://raw.githubusercontent.com/Chreece/GuestDoor/main/docker-compose.yml
 ```
 
-### 3. Create a .env file in the same directory with the following variables and change the values of them7
+### 3. Create a .env file in the same directory with the following variables and change the values of them
 
 ```bash
 API_SECRET=your_api_secret
@@ -52,12 +61,13 @@ POSTGRES_USER=myuser
 POSTGRES_PASSWORD=password
 PORT=5000
 ```
-
+```
 API_SECRET: A secret token for Authentication allowing HA to communicate with the APP and store the passcode.
 HA_WEBHOOK: The webhook url that triggers your automation after the successful authentication.
 POSTGRES_USER: Your PostgreSQL database user.
 POSTGRES_PASSWORD: The password for the PostgreSQL database user.
 PORT: The port that the webpage is listening
+```
 
 ### 4. Build the Docker container:
 
@@ -91,6 +101,16 @@ rest_passcode: Bearer <here put the API_SECRET value from the .env file>
 ### 3. Create a webhook [trigger](https://www.home-assistant.io/docs/automation/trigger/#webhook-trigger) in Home Assistant:
 
 This webhook will be called from the flask app if the access is granted (passcode check) and the automation will be triggered
+
+### 4. Create an automation in Home Assistant to update the passcode:
+
+Calling the following action to change the passcode:
+```
+action: rest_command.rest_passcode
+data:
+  passcode: <the new 4digit passcode>
+
+```
 
 ## How It Works
 
