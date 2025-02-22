@@ -65,7 +65,7 @@ PORT=5000
 ```
 
 API_SECRET: A secret token for Authentication allowing HA to communicate with the APP and store the passcode.
-HA_WEBHOOK: The webhook url (http://`homeassistant_ip`:`homeassistant_port`/api/webhook/`webhook_id`) that triggers your automation after the successful authentication.
+HA_WEBHOOK: The webhook url from [HA](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-webhook-trigger-in-home-assistant) (http://`homeassistant_ip`:`homeassistant_port`/api/webhook/`webhook_id`).
 POSTGRES_USER: Your PostgreSQL database user.
 POSTGRES_PASSWORD: The password for the PostgreSQL database user.
 PORT: The port that the webpage is listening
@@ -103,7 +103,7 @@ Leave the `Bearer` and put the API_SECRET next to it (with a space between them)
 ### 3. Create a webhook [trigger](https://www.home-assistant.io/docs/automation/trigger/#webhook-trigger) in Home Assistant:
 
 This webhook will be called from the flask app if the access is granted (passcode check) and the automation will be triggered
-Copy the webhook_id to [`HA_WEBHOOK`](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) variable in [.env](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) file
+Copy the webhook_id to [`HA_WEBHOOK`](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) url in [.env] file (https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) (http://<homeassistant_ip>:<homeassistant_port>/api/webhook/<webhook_id>) to replace the <webhook_id>.
 
 ### 4. Create an automation in Home Assistant to update the passcode:
 
