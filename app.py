@@ -94,7 +94,7 @@ def check_passcode():
     if not entered_passcode:
         return jsonify({"error": "Passcode is required"}), 400
 
-    # Initialize tracking for this IP if it's a new user
+    # Initialize failed_attempts tracking
     if client_ip not in failed_attempts:
         failed_attempts[client_ip] = {"count": 0, "locked_until": 0}
 
@@ -111,7 +111,7 @@ def check_passcode():
         correct_passcode = result[0]
 
         if correct_passcode == entered_passcode:
-            # Reset failed attempts on successful entry
+            # Reset failed attempts on success
             failed_attempts.pop(client_ip, None)
             try:
                 response = requests.post(HOME_ASSISTANT_URL)
@@ -122,14 +122,14 @@ def check_passcode():
             except requests.exceptions.RequestException as e:
                 return jsonify({"message": "Access granted, but Home Assistant request failed.", "error": str(e)}), 500
 
-        # Increment failed attempts on incorrect passcode
+        # Increment failed attempts count
         failed_attempts[client_ip]["count"] += 1
-
         remaining_attempts = MAX_ATTEMPTS - failed_attempts[client_ip]["count"]
 
-        # If max attempts are reached, apply lockout time
+        # If max attempts are reached, lockout user
         if failed_attempts[client_ip]["count"] >= MAX_ATTEMPTS:
             failed_attempts[client_ip]["locked_until"] = now + LOCKOUT_TIME
+            failed_attempts[client_ip]["count"] = MAX_ATTEMPTS  # Ensure it doesn't reset unexpectedly
             return jsonify({"message": "Too many failed attempts. Locked out for a while."}), 429
 
         return jsonify({"message": f"Access denied. {remaining_attempts} tries left."}), 403
