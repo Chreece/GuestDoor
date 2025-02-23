@@ -11,15 +11,20 @@ failed_attempts = {}
 MAX_ATTEMPTS = 3
 LOCKOUT_TIME = 60
 
-HOME_ASSISTANT_URL = os.getenv("HA_WEBHOOK", "")
-
 # Database connection
 DB_HOST = os.getenv("DB_HOST", "postgres")
 DB_USER = os.getenv("DB_USER", "myuser")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "password")
 DB_NAME = os.getenv("DB_NAME", "passcodes")
 
-API_SECRET = os.getenv("API_SECRET", "")
+API_SECRET = os.getenv("API_SECRET")
+if not API_SECRET:
+    raise ValueError("API_SECRET environment variable is missing!")
+
+HOME_ASSISTANT_URL = os.getenv("HA_WEBHOOK")
+if not HOME_ASSISTANT_URL:
+    raise ValueError("HA_WEBHOOK environment variable is missing!")
+
 
 def create_table():
     for _ in range(10):  # Try for ~10 times
@@ -88,6 +93,13 @@ def get_db_connection():
         dbname=DB_NAME
     )
 
+def query_db(query, args=(), one=False):
+    with get_db_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(query, args)
+            result = cur.fetchone() if one else cur.fetchall()
+    return result
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -122,8 +134,7 @@ def check_passcode():
         cur = conn.cursor()
 
         # Get the latest passcode
-        cur.execute("SELECT code FROM passcodes ORDER BY date DESC LIMIT 1")
-        result = cur.fetchone()
+        result = query_db("SELECT code FROM passcodes ORDER BY date DESC LIMIT 1", one=True)
 
         cur.close()
         conn.close()
@@ -156,10 +167,9 @@ def check_passcode():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
     finally:
-        cur.close()
-        conn.close()
+        if 'cur' in locals(): cur.close()
+        if 'conn' in locals(): conn.close()
 
 
 if __name__ == "__main__":

@@ -1,19 +1,24 @@
-# Use a lightweight Python image
-FROM python:3.10
+# Use an official lightweight Python image
+FROM python:3.11
 
-# Set the working directory
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy all necessary files
+# Copy the requirements file
 COPY requirements.txt .
-COPY app.py .
-COPY frontend /app/frontend
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port Flask runs on
+# Copy the rest of the application code
+COPY . .
+
+# Expose the port Flask will run on
 EXPOSE 5000
 
-# Run the application
-CMD ["python", "app.py"]
+# Set environment variables
+ENV FLASK_ENV=production
+ENV FLASK_APP=app.py
+
+# Run the application with Gunicorn
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
