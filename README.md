@@ -93,6 +93,8 @@ rest_command:
     payload: >
       {"passcode": {{ passcode }} }
 ```
+This will be the Home Assistant action to update the passcode in GuestDoor.
+
 ### 2. Create a secret in your secrets.yaml:
 
 ```
@@ -102,7 +104,7 @@ Leave the `Bearer` and put the `API_SECRET` next to it (with a space between the
 
 ### 3. Create a [webhook trigger](https://www.home-assistant.io/docs/automation/trigger/#webhook-trigger) in Home Assistant:
 
-This webhook will be called from the flask app if the access is granted (passcode check) and the automation will be triggered.
+This webhook will be called from the GuestDoor if the access is granted (passcode check) and the automation will be triggered.
 
 Copy the webhook_id to [`HA_WEBHOOK`](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) url in [.env](https://github.com/Chreece/GuestDoor?tab=readme-ov-file#3-create-a-env-file-in-the-same-directory-with-the-following-variables-and-change-the-values-of-them) file (http://<homeassistant_ip>:<homeassistant_port>/api/webhook/<webhook_id>) to replace the <webhook_id>.
 
