@@ -94,25 +94,24 @@ def check_passcode():
     if not entered_passcode:
         return jsonify({"error": "Passcode is required"}), 400
 
+    # Initialize tracking for this IP if it's a new user
     if client_ip not in failed_attempts:
-        failed_attempts[client_ip] = {"count": 0, "last_attempt": 0}
+        failed_attempts[client_ip] = {"count": 0, "locked_until": 0}
 
-    attempts = failed_attempts[client_ip]["count"]
-    last_attempt = failed_attempts[client_ip]["last_attempt"]
-
-    if attempts >= MAX_ATTEMPTS and now - last_attempt < LOCKOUT_TIME:
+    # Check if the client is currently locked out
+    if now < failed_attempts[client_ip]["locked_until"]:
         return jsonify({"message": "Too many failed attempts. Try again later."}), 429
-    
-    if attempts >= MAX_ATTEMPTS:
-        failed_attempts[client_ip] = {"count": 0, "last_attempt": 0}
 
     try:
         result = query_db("SELECT code FROM passcodes ORDER BY date DESC LIMIT 1", one=True)
+
         if not result:
             return jsonify({"message": "No passcode found"}), 404
 
         correct_passcode = result[0]
+
         if correct_passcode == entered_passcode:
+            # Reset failed attempts on successful entry
             failed_attempts.pop(client_ip, None)
             try:
                 response = requests.post(HOME_ASSISTANT_URL)
@@ -123,9 +122,16 @@ def check_passcode():
             except requests.exceptions.RequestException as e:
                 return jsonify({"message": "Access granted, but Home Assistant request failed.", "error": str(e)}), 500
 
+        # Increment failed attempts on incorrect passcode
         failed_attempts[client_ip]["count"] += 1
-        failed_attempts[client_ip]["last_attempt"] = now
+
+        # If max attempts are reached, apply lockout time
+        if failed_attempts[client_ip]["count"] >= MAX_ATTEMPTS:
+            failed_attempts[client_ip]["locked_until"] = now + LOCKOUT_TIME
+            return jsonify({"message": "Too many failed attempts. Locked out for a while."}), 429
+
         remaining_attempts = MAX_ATTEMPTS - failed_attempts[client_ip]["count"]
+
         return jsonify({"message": f"Access denied. {remaining_attempts} tries left."}), 403
 
     except Exception as e:
