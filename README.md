@@ -1,4 +1,4 @@
-# GuestDoor - Run Home Assistant automations from a local webpage using passcode authentication.
+# GuestDoor / Production - Run Home Assistant automations from a local webpage using passcode authentication.
 
 # DISCLAIMER: This project was developed with the assistance of ChatGPT. It is not intended for controlling critical security devices, as it has not been professionally verified.
 
@@ -13,7 +13,7 @@ When a user, within the WiFi network scans the NFC, the webpage launches and ask
 ## Features
 
 - Trigger Automations without the Home Assistant APP, with a simple 4 digit passcode authentication.
-- Running and exposed locally.
+- Running and exposed locally - This branch could be exposed to internet --not recommended--.
 - Flask app running inside a Docker container.
 - Environment variables to configure the app.
 - Passcode stored and validated in a Postgres database.
