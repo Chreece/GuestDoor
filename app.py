@@ -125,12 +125,12 @@ def check_passcode():
         # Increment failed attempts on incorrect passcode
         failed_attempts[client_ip]["count"] += 1
 
+        remaining_attempts = MAX_ATTEMPTS - failed_attempts[client_ip]["count"]
+
         # If max attempts are reached, apply lockout time
         if failed_attempts[client_ip]["count"] >= MAX_ATTEMPTS:
             failed_attempts[client_ip]["locked_until"] = now + LOCKOUT_TIME
             return jsonify({"message": "Too many failed attempts. Locked out for a while."}), 429
-
-        remaining_attempts = MAX_ATTEMPTS - failed_attempts[client_ip]["count"]
 
         return jsonify({"message": f"Access denied. {remaining_attempts} tries left."}), 403
 
