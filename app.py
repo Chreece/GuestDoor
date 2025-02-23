@@ -25,66 +25,6 @@ HOME_ASSISTANT_URL = os.getenv("HA_WEBHOOK")
 if not HOME_ASSISTANT_URL:
     raise ValueError("HA_WEBHOOK environment variable is missing!")
 
-
-def create_table():
-    for _ in range(10):  # Try for ~10 times
-        try:
-            conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS passcodes (
-                    id SERIAL PRIMARY KEY,
-                    code VARCHAR(10) NOT NULL,
-                    date DATE NOT NULL DEFAULT CURRENT_DATE
-                );
-            """)
-            conn.commit()
-            cur.close()
-            conn.close()
-            print("Database initialized.")
-            return
-        except psycopg2.OperationalError as e:
-            print(f"Database not ready: {e}")
-            time.sleep(5)  # Wait before retrying
-
-    print("Could not connect to database after multiple attempts. Exiting.")
-    exit(1)
-
-@app.route("/add_passcode", methods=["POST"])
-def add_passcode():
-    """Securely adds a single passcode, replacing the existing one."""
-    print("Received a request!")
-    print("Headers:", dict(request.headers))
-    print("Body:", request.get_data(as_text=True))
-    
-    auth_header = request.headers.get("Authorization")
-
-    if auth_header != f"Bearer {API_SECRET}":
-        return jsonify({"error": "Unauthorized"}), 403
-
-    data = request.get_json()
-    new_passcode = data.get("passcode")
-
-    if not new_passcode:
-        return jsonify({"message": "Passcode is required"}), 400
-
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        # Ensure only one passcode exists: replace or insert
-        cur.execute("DELETE FROM passcodes")  # Remove any existing passcode
-        cur.execute("INSERT INTO passcodes (code, date) VALUES (%s, CURRENT_DATE)", (new_passcode,))
-
-        conn.commit()
-        cur.close()
-        conn.close()
-
-        return jsonify({"message": "Passcode updated successfully"}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 def get_db_connection():
     return psycopg2.connect(
         host=DB_HOST,
@@ -98,7 +38,46 @@ def query_db(query, args=(), one=False):
         with conn.cursor() as cur:
             cur.execute(query, args)
             result = cur.fetchone() if one else cur.fetchall()
+            conn.commit()
     return result
+
+def create_table():
+    for _ in range(10):  # Try for ~10 times
+        try:
+            query_db("""
+                CREATE TABLE IF NOT EXISTS passcodes (
+                    id SERIAL PRIMARY KEY,
+                    code VARCHAR(10) NOT NULL,
+                    date DATE NOT NULL DEFAULT CURRENT_DATE
+                );
+            """)
+            print("Database initialized.")
+            return
+        except psycopg2.OperationalError as e:
+            print(f"Database not ready: {e}")
+            time.sleep(5)  # Wait before retrying
+
+    print("Could not connect to database after multiple attempts. Exiting.")
+    exit(1)
+
+@app.route("/add_passcode", methods=["POST"])
+def add_passcode():
+    """Securely adds a single passcode, replacing the existing one."""
+    auth_header = request.headers.get("Authorization")
+    if auth_header != f"Bearer {API_SECRET}":
+        return jsonify({"error": "Unauthorized"}), 403
+
+    data = request.get_json()
+    new_passcode = data.get("passcode")
+    if not new_passcode:
+        return jsonify({"message": "Passcode is required"}), 400
+
+    try:
+        query_db("DELETE FROM passcodes")
+        query_db("INSERT INTO passcodes (code, date) VALUES (%s, CURRENT_DATE)", (new_passcode,))
+        return jsonify({"message": "Passcode updated successfully"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/")
 def index():
@@ -121,31 +100,19 @@ def check_passcode():
     attempts = failed_attempts[client_ip]["count"]
     last_attempt = failed_attempts[client_ip]["last_attempt"]
 
-    # Check if user is in lockout period
+    if attempts >= MAX_ATTEMPTS and now - last_attempt < LOCKOUT_TIME:
+        return jsonify({"message": "Too many failed attempts. Try again later."}), 429
+    
     if attempts >= MAX_ATTEMPTS:
-        if now - last_attempt < LOCKOUT_TIME:
-            return jsonify({"message": "Too many failed attempts. Try again later."}), 429
-        else:
-            # Lockout period expired, reset attempts
-            failed_attempts[client_ip] = {"count": 0, "last_attempt": 0}
+        failed_attempts[client_ip] = {"count": 0, "last_attempt": 0}
 
     try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        # Get the latest passcode
         result = query_db("SELECT code FROM passcodes ORDER BY date DESC LIMIT 1", one=True)
-
-        cur.close()
-        conn.close()
-
         if not result:
             return jsonify({"message": "No passcode found"}), 404
 
         correct_passcode = result[0]
-
         if correct_passcode == entered_passcode:
-            # Reset failed attempts on success
             failed_attempts.pop(client_ip, None)
             try:
                 response = requests.post(HOME_ASSISTANT_URL)
@@ -156,21 +123,13 @@ def check_passcode():
             except requests.exceptions.RequestException as e:
                 return jsonify({"message": "Access granted, but Home Assistant request failed.", "error": str(e)}), 500
 
-        # Increment failed attempts on incorrect passcode
         failed_attempts[client_ip]["count"] += 1
         failed_attempts[client_ip]["last_attempt"] = now
-
         remaining_attempts = MAX_ATTEMPTS - failed_attempts[client_ip]["count"]
-
         return jsonify({"message": f"Access denied. {remaining_attempts} tries left."}), 403
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-    finally:
-        if 'cur' in locals(): cur.close()
-        if 'conn' in locals(): conn.close()
-
 
 if __name__ == "__main__":
     create_table()
