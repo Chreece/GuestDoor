@@ -10,7 +10,8 @@ failed_attempts = {}
 
 MAX_ATTEMPTS = 3
 LOCKOUT_TIME = 60
-
+global_failed_attempts = 0  
+system_lock_until = 0 
 # Database connection
 DB_HOST = os.getenv("DB_HOST", "postgres")
 DB_USER = os.getenv("DB_USER", "myuser")
@@ -85,22 +86,20 @@ def index():
 
 @app.route("/check_passcode", methods=["POST"])
 def check_passcode():
-    """Checks if the entered passcode matches the latest one."""
-    client_ip = request.remote_addr  # Get user's IP
+    """Locks the system for everyone after 3 failed attempts for 1 minute."""
+    global global_failed_attempts, system_lock_until
+    
     now = time.time()
+    
+    # Check if system is in lockout mode
+    if now < system_lock_until:
+        return jsonify({"message": "System is locked due to too many failed attempts. Try again later."}), 429
+
     data = request.get_json()
     entered_passcode = data.get("passcode")
 
     if not entered_passcode:
         return jsonify({"error": "Passcode is required"}), 400
-
-    # Initialize failed_attempts tracking
-    if client_ip not in failed_attempts:
-        failed_attempts[client_ip] = {"count": 0, "locked_until": 0}
-
-    # Check if the client is currently locked out
-    if now < failed_attempts[client_ip]["locked_until"]:
-        return jsonify({"message": "Too many failed attempts. Try again later."}), 429
 
     try:
         result = query_db("SELECT code FROM passcodes ORDER BY date DESC LIMIT 1", one=True)
@@ -111,8 +110,8 @@ def check_passcode():
         correct_passcode = result[0]
 
         if correct_passcode == entered_passcode:
-            # Reset failed attempts on success
-            failed_attempts.pop(client_ip, None)
+            # Reset failed attempts globally on success
+            global_failed_attempts = 0
             try:
                 response = requests.post(HOME_ASSISTANT_URL)
                 if response.status_code == 200:
@@ -122,15 +121,14 @@ def check_passcode():
             except requests.exceptions.RequestException as e:
                 return jsonify({"message": "Access granted, but Home Assistant request failed.", "error": str(e)}), 500
 
-        # Increment failed attempts count
-        failed_attempts[client_ip]["count"] += 1
-        remaining_attempts = MAX_ATTEMPTS - failed_attempts[client_ip]["count"]
+        # Increment failed attempts globally
+        global_failed_attempts += 1  
+        remaining_attempts = MAX_ATTEMPTS - global_failed_attempts
 
-        # If max attempts are reached, lockout user
-        if failed_attempts[client_ip]["count"] >= MAX_ATTEMPTS:
-            failed_attempts[client_ip]["locked_until"] = now + LOCKOUT_TIME
-            failed_attempts[client_ip]["count"] = MAX_ATTEMPTS  # Ensure it doesn't reset unexpectedly
-            return jsonify({"message": "Too many failed attempts. Locked out for a while."}), 429
+        # Lock system if max attempts are reached
+        if global_failed_attempts >= MAX_ATTEMPTS:
+            system_lock_until = now + LOCKOUT_TIME
+            return jsonify({"message": "Too many failed attempts. System locked for 1 minute."}), 429
 
         return jsonify({"message": f"Access denied. {remaining_attempts} tries left."}), 403
 
